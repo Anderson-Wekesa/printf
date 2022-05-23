@@ -1,39 +1,128 @@
 #include "main.h"
 
 /**
- * get_print - selects the right printing function
- * depending on the conversion specifier passed to _printf
- * @s: character that holds the conversion specifier
- * Description: the function loops through the structs array
- * func_arr[] to find a match between the specifier passed to _printf
- * and the first element of the struct, and then the approriate
- * printing function
- * Return: a pointer to the matching printing function
+ * get_specifier - finds the format func
+ * @s: the format string
+ * Return: the number of bytes printed
  */
-int (*get_print(char s))(va_list, flags_t *)
+int (*get_specifier(char *s))(va_list ap, params_t *params)
 {
-	ph func_arr[] = {
-		{'i', print_int},
-		{'s', print_string},
-		{'c', print_char},
-		{'d', print_int},
-		{'u', print_unsigned},
-		{'x', print_hex},
-		{'X', print_hex_big},
-		{'b', print_binary},
-		{'o', print_octal},
-		{'R', print_rot13},
-		{'r', print_rev},
-		{'S', print_bigS},
-		{'p', print_address},
-		{'%', print_percent}
-		};
-	int flags = 14;
+	specifier_t specifiers[] = {
+		{"c", print_char},
+		{"d", print_int},
+		{"i", print_int},
+		{"s", print_string},
+		{"%", print_percent},
+		{"b", print_binary},
+		{"o", print_octal},
+		{"u", print_unsigned},
+		{"x", print_hex},
+		{"X", print_HEX},
+		{"p", print_address},
+		{"S", print_S},
+		{"r", print_rev},
+		{"R", print_rot13},
+		{NULL, NULL}
+	};
+	int i = 0;
 
-	register int i;
-
-	for (i = 0; i < flags; i++)
-		if (func_arr[i].c == s)
-			return (func_arr[i].f);
+	while (specifiers[i].specifier)
+	{
+		if (*s == specifiers[i].specifier[0])
+		{
+			return (specifiers[i].f);
+		}
+		i++;
+	}
 	return (NULL);
+}
+/**
+ * get_print_func - finds the format func
+ * @s: the format string
+ * @ap: argument pointer
+ * @params: the parameters struct
+ * Return: the number of bytes printed
+ */
+int get_print_func(char *s, va_list ap, params_t *params)
+{
+	int (*f)(va_list, params_t *) = get_specifier(s);
+
+	if (f)
+		return (f(ap, params));
+	return (0);
+}
+/**
+ * get_flag - finds the flag func
+ * @s: the format string
+ * @params: the parameters struct
+ * Return: if flag was valid
+ */
+int get_flag(char *s, params_t *params)
+{
+	int i = 0;
+
+	switch (*s)
+	{
+		case '+':
+			i = params->plus_flag = 1;
+			break;
+		case ' ':
+			i = params->space_flag = 1;
+			break;
+		case '#':
+			i = params->hashtag_flag = 1;
+			break;
+		case '-':
+			i = params->minus_flag = 1;
+			break;
+		case '0':
+			i = params->zero_flag = 1;
+			break;
+	}
+	return (i);
+}
+/**
+ * get_modifier - finds the modifier func
+ * @s: the format string
+ * @params: the parameters struct
+ * Return: if modifier was valid
+ */
+int get_modifier(char *s, params_t *params)
+{
+	int i = 0;
+
+	switch (*s)
+	{
+	case 'h':
+		i = params->h_modifier = 1;
+		break;
+	case 'l':
+		i = params->l_modifier = 1;
+		break;
+	}
+	return (i);
+}
+/**
+ * get_width - gets the width from the format string
+ * @s: the format string
+ * @params: the parameters struct
+ * @ap: the argument pointer
+ * Return: new pointer
+ */
+char *get_width(char *s, params_t *params, va_list ap)
+{
+	int d = 0;
+
+	if (*s == '*')
+	{
+		d = va_arg(ap, int);
+		s++;
+	}
+	else
+	{
+		while (_isdigit(*s))
+			d = d * 10 + (*s++ - '0');
+	}
+	params->width = d;
+	return (s);
 }
