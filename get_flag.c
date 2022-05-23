@@ -1,48 +1,22 @@
 #include "main.h"
 
 /**
- * get_flag - turns on flags if _printf finds
- * a flag modifier in the format string
- * @s: character that holds the flag specifier
- * @f: pointer to the struct flags in which we turn the flags on
- *
- * Return: 1 if a flag has been turned on, 0 otherwise
+ * init_params - clears struct fields and reset buf
+ * @params: the parameters struct
+ * @ap: the argument pointer
+ * Return: void
  */
-int get_flag(char s, flags_t *f)
+void init_params(params_t *params, va_list ap)
 {
-	int i = 0;
-
-	switch (s)
-	{
-		case '+':
-			f->plus = 1;
-			i = 1;
-			break;
-		case ' ':
-			f->space = 1;
-			i = 1;
-			break;
-		case '#':
-			f->hash = 1;
-			i = 1;
-			break;
-		case '-':
-			f->minus = 1;
-			i = 1;
-			break;
-		case '0':
-			f->zero = 1;
-			i = 1;
-			break;
-		case 'h':
-			f->h = 1;
-			i = 1;
-			break;
-		case 'l':
-			f->l = 1;
-			i = 1;
-			break;
-	}
-
-	return (i);
+	params->unsign = 0;
+	params->plus_flag = 0;
+	params->space_flag = 0;
+	params->hashtag_flag = 0;
+	params->zero_flag = 0;
+	params->minus_flag = 0;
+	params->width = 0;
+	params->precision = UINT_MAX;
+	params->h_modifier = 0;
+	params->l_modifier = 0;
+	(void)ap;
 }
